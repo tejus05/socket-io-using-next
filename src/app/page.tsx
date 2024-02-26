@@ -3,6 +3,7 @@
 import { useSocket } from "@/components/providers/SocketProvider";
 import { Circle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { MESSAGES } from "./MESSAGES";
 
 export default function Home() {
 
@@ -32,8 +33,22 @@ export default function Home() {
     };
   }, [socket]);
 
+  const sendMessage = () => {
+    if (socket) {
+      socket.emit("sent-message", userMessage);
+    }
+  }
+
   return (
-    <div className="w-full min-h-screen flex justify-center items-center">
+    <div className="flex justify-between items-center flex-col max-h-screen">
+      <p className="text-2xl my-5">
+        Public
+      </p>
+      <div>
+        {MESSAGES.map((message, index) => (
+          <p key={index}>{message}</p>
+        ))}
+      </div>
       <div className="absolute top-5 left-5">
         {isConnected ? (
           <div>
@@ -47,7 +62,7 @@ export default function Home() {
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-3 items-center">
+      <div className="fixed bottom-10 gap-4 flex">
         <input
           type="text"
           placeholder="Enter your message"
@@ -55,21 +70,18 @@ export default function Home() {
           onChange={(e) => {
             setUserMessage(e.target.value);
           }}
+          onKeyDown={(e: any) => {
+            if (e.key === "Enter") {
+              sendMessage()
+            }
+          }}
         />
         <button
           className="bg-white py-2 px-3 w-20 text-center rounded-lg outline-none"
-          onClick={() => {
-            if (socket) {
-              socket.emit("sent-message", userMessage);
-              // setUserMessage("");
-            }
-          }}
+          onClick={sendMessage}
         >
           Send
         </button>
-        {messages.map((message, index) => (
-          <p key={index}>{message}</p>
-        ))}
       </div>
     </div>
   );
